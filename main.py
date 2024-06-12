@@ -1,9 +1,8 @@
 import discord
 from discord import app_commands
-from discord.ui import Button, View
-from discord.colour import Colour
-from buttons import HitButton
+from ui_subclasses import GameEmbed, GameView
 
+from blackjack import Blackjack as bj
 
 import sqlite3
 from dotenv import dotenv_values
@@ -31,6 +30,9 @@ async def on_ready():
     await command_tree.sync()
     print(f"Logged in as {client.user}")
 
+#TODO
+# Perhaps change this to the "on_raw_message_edit" to give an indication when to clear the
+# active games dict
 @client.event
 async def on_message(message):
     if message.author == client.user:
@@ -39,20 +41,24 @@ async def on_message(message):
     if message.content.startswith("$hello"):
         await message.channel.send("HELLO")
 
-@command_tree.command(name="say_hi")
-async def hi(interact: discord.Interaction):
+@command_tree.command(name="blackjack")
+async def Blackjack(interact: discord.Interaction):
+
     reply = interact.response
-    embed = discord.Embed(title="This is an embedded response", color=Colour.blue(), description="This is the description")
     player = interact.user.id
 
     if player in games.keys():
-        embed.title = "Finish previous game"
-        await reply.send_message(embed=embed)
+        await reply.send_message(embed=discord.Embed(title="Please finish previous game"),
+                                 ephemeral=True,delete_after=4)
     else:
+
+        game = bj()
+        embed = GameEmbed(interact.user.name)
+
         games[player] = interact.id
-        buttons = View()
-        buttons.add_item(HitButton())
-        buttons.add_item(item=Button(label="Bye"))
+
+        buttons = GameView(instance=game,window=embed)
+
         await reply.send_message(embed=embed, view=buttons)
 
 
