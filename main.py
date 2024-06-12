@@ -2,6 +2,9 @@ import discord
 from discord import app_commands
 from discord.ui import Button, View
 from discord.colour import Colour
+from buttons import HitButton
+
+
 import sqlite3
 from dotenv import dotenv_values
 
@@ -48,7 +51,7 @@ async def hi(interact: discord.Interaction):
     else:
         games[player] = interact.id
         buttons = View()
-        buttons.add_item(item=Button(label="Hi"))
+        buttons.add_item(HitButton())
         buttons.add_item(item=Button(label="Bye"))
         await reply.send_message(embed=embed, view=buttons)
 
