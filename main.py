@@ -53,7 +53,7 @@ async def Blackjack(interact: discord.Interaction):
     else:
 
         game = bj()
-        embed = GameEmbed(interact.user.name)
+        embed = GameEmbed(interact.user.name, game=game)
 
         games[player] = interact.id
 

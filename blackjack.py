@@ -56,7 +56,11 @@ class Blackjack():
                 total += card.get_value()
 
         return total
-
+    def get_player_hand(self)->str:
+        cards = []
+        for card in self._player_hand:
+            cards.append(card.get_label())
+        return " ".join(cards)
     def get_dealer_val(self)->int:
         total = 0
 
@@ -72,6 +76,13 @@ class Blackjack():
                 total += card.get_value()
 
         return total
+
+    def get_dealer_hand(self)->str:
+        cards = []
+        for card in self._dealer_hand:
+            cards.append(card.get_label())
+        return " ".join(cards)
+
 
 if __name__ == "__main__":
     game = Blackjack()

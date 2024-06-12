@@ -7,22 +7,25 @@ from blackjack import Blackjack
 
 class GameEmbed(Embed):
     # The embed window is where the game visuals are located.
-    def __init__(self, player_name: str):
+    def __init__(self, player_name: str, game: Blackjack):
         super().__init__(title="Blackjack",
                          color=Colour.blue(),
                          description=f"Player: {player_name}")
 
         self._player = player_name
 
-        self.insert_field_at(index=0, name=player_name, value="Values here",inline=False)
-        self.insert_field_at(index=1, name="Dealer", value="Values here",inline=False)
+        self.insert_field_at(index=0, name=f"{self._player} | {game.get_player_val()}",
+                             value=game.get_player_hand(),inline=False)
 
-    def change_player_info(self, total: int, cards: list):
+        self.insert_field_at(index=1, name=f"Dealer | {game.get_dealer_val()}",
+                             value=game.get_dealer_hand(),inline=False)
+
+    def change_player_info(self, total: int, cards: str):
         #TODO display the cards obtained
-        self.set_field_at(index=0, name=f"{self._player} | {total}", value="!!!!", inline=False)
-    def change_dealer_info(self, total: int, cards: list):
+        self.set_field_at(index=0, name=f"{self._player} | {total}", value=cards, inline=False)
+    def change_dealer_info(self, total: int, cards: str):
         #TODO display the cards obtained
-        self.set_field_at(index=1, name=f"Dealer | {total}", value="????", inline=False)
+        self.set_field_at(index=1, name=f"Dealer | {total}", value=cards, inline=False)
 
 class GameView(View):
 
@@ -45,7 +48,7 @@ class HitButton(Button):
     async def callback(self, press: Interaction):
 
         self._instance.draw_player()
-        self._window.change_player_info(total=self._instance.get_player_val(),cards=[])
+        self._window.change_player_info(total=self._instance.get_player_val(),cards=self._instance.get_player_hand())
 
         await press.response.edit_message(embed=self._window)
 
@@ -57,7 +60,7 @@ class StandButton(Button):
     async def callback(self, press: Interaction):
 
         self._instance.stand()
-        self._window.change_dealer_info(total=self._instance.get_dealer_val(),cards=[])
+        self._window.change_dealer_info(total=self._instance.get_dealer_val(),cards=self._instance.get_dealer_hand())
 
         await press.response.edit_message(embed=self._window, view=None)
 
