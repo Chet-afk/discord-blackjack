@@ -3,8 +3,8 @@ from discord import app_commands
 from ui_subclasses import GameEmbed, GameView
 
 from blackjack import Blackjack as bj
+import database
 
-import sqlite3
 from dotenv import dotenv_values
 
 TOKEN = dotenv_values(".env")["TOKEN"]
@@ -28,6 +28,8 @@ games = {}
 async def on_ready():
     # Sync up all slash commands before starting up
     await command_tree.sync()
+    database.init_setup()
+
     print(f"Logged in as {client.user}")
 
 
@@ -42,10 +44,14 @@ async def on_message_edit(prior_message: discord.Message, new_message: discord.M
 
 
 @command_tree.command(name="blackjack")
-async def Blackjack(interact: discord.Interaction):
+async def Blackjack(interact: discord.Interaction, bet: int):
 
     reply = interact.response
     player = interact.user.id
+
+    if not database.exists(player):
+        await reply.send_message(embed=discord.Embed(title="Please use the /register command"))
+        return
 
     if player in games.keys():
         await reply.send_message(embed=discord.Embed(title="Please finish previous game"),
@@ -64,7 +70,13 @@ async def Blackjack(interact: discord.Interaction):
             buttons = GameView(instance=game,window=embed)
             await reply.send_message(embed=embed, view=buttons)
 
-
+@command_tree.command(name="register")
+async def Register(interact: discord.Interaction):
+    user = interact.user.id
+    if database.exists(user):
+        return
+    else:
+        database.register(user)
 
 
 client.run(TOKEN)
