@@ -57,6 +57,18 @@ def update(id: int, difference: int):
 
     connection.commit()
 
+def get_chips(id: int)->int:
+    global cursor
+    return cursor.execute(f"""
+    SELECT value
+    FROM chips
+    WHERE id = {id}""").fetchone()[0]
+
+def close():
+    global cursor, connection
+    cursor.close()
+    connection.close()
 
 if __name__ == "__main__":
     init_setup()
+    close()
