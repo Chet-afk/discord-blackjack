@@ -30,16 +30,16 @@ async def on_ready():
     await command_tree.sync()
     print(f"Logged in as {client.user}")
 
-#TODO
-# Perhaps change this to the "on_raw_message_edit" to give an indication when to clear the
-# active games dict
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
 
-    if message.content.startswith("$hello"):
-        await message.channel.send("HELLO")
+@client.event
+async def on_message_edit(prior_message: discord.Message, new_message: discord.Message):
+    # Check if the editted message was the bots,
+    # and if the editted values have content (none means the game is still going
+    if prior_message.author != client.user or new_message.content == "":
+        return
+    # Remove game to allow new game start
+    del games[new_message.interaction.user.id]
+
 
 @command_tree.command(name="blackjack")
 async def Blackjack(interact: discord.Interaction):
@@ -55,11 +55,16 @@ async def Blackjack(interact: discord.Interaction):
         game = bj()
         embed = GameEmbed(interact.user.name, game=game)
 
-        games[player] = interact.id
+        # Natural 21 on draw
+        if game.get_player_val() == 21:
+            game.stand()
+            await reply.send_message(content=game.end_game(), embed=embed)
+        else:
+            games[player] = game
+            buttons = GameView(instance=game,window=embed)
+            await reply.send_message(embed=embed, view=buttons)
 
-        buttons = GameView(instance=game,window=embed)
 
-        await reply.send_message(embed=embed, view=buttons)
 
 
 client.run(TOKEN)
